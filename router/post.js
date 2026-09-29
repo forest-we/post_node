@@ -132,30 +132,6 @@ router.post('/like', verifyToken, async (req,res) =>{
 
 })
 
-router.get('/like', verifyToken, async (req,res) =>{
-    const post_id = req.query.post_id
-   try{
-     if(!post_id){
-        console.log('帖子id:' + post_id);
-        return res.status(400).json({
-            code:400,
-            message:'没有提供帖子id'
-        })
-    }
-    const [row] = await db.query('SELECT COUNT(*) AS total FROM post_like WHERE post_id = ?', [post_id])
-    const count = row[0].total
-    res.status(200).json({
-        code:200,
-        data:count
-    })
-   }
-   catch(err){
-    res.status(500).json({
-        code:500,
-        message:'查询点赞时出现问题'
-    })
-   }
-})
 
 router.get('/follow/post', verifyToken, async (req,res) =>{
     try{

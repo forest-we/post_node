@@ -4,6 +4,7 @@ const verifyToken = require('../utils/verify')
 const multer = require('multer')
 const sharp = require('sharp')
 const db = require('../sql-db/db')
+const fs = require('fs')
 const { fileUrl } = require('../utils/url')
 
 const upload = multer({
@@ -37,6 +38,8 @@ router.post('/upload',  verifyToken, upload.single('avatar'), async (req,res) =>
    }
    catch(err){
     console.log(err.message);
+     if(req.file?.path)
+      fs.unlink(req.file.path,()=>{})
     res.status(500).json({
         code:500,
         message:'额,出了点问题'
