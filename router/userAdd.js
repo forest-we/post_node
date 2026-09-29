@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const verifyToken = require('../utils/verify')
 const multer = require('multer')
+const sharp = require('sharp')
 const db = require('../sql-db/db')
 const { fileUrl } = require('../utils/url')
 
@@ -13,9 +14,17 @@ router.post('/upload',  verifyToken, upload.single('avatar'), async (req,res) =>
    try{
      if(!req.file){
         return res.status(400).json({
-            code:400
+            code:400,
+            message:'图片格式错误'
         })
     }
+    if(!req.file.filename){
+        return res.status(400).json({
+            code:400,
+            message:'图片格式错误'
+        })
+    }
+    await sharp(req.file.path).metadata()
     const avatarPath = req.file.filename
     const [row] = await db.query('UPDATE user SET avatar = ? WHERE id = ?', [avatarPath, req.user.id])
     if(row.affectedRows === 1){

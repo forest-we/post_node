@@ -31,6 +31,7 @@ router.post('/post/create', verifyToken, async (req, res) =>{   //发布帖子
 })
 router.get('/post/list', verifyToken, async (req,res) =>{   //主页贴子展示
         try{
+            console.log(req.headers['x-real-ip']);
             const page = Number(req.query.page) || 1   //页数
              const  pageSize = Number(req.query.pageSize) || 10   //查询多少条数据
     const offset = (page - 1) * pageSize   
@@ -100,7 +101,7 @@ router.post('/like', verifyToken, async (req,res) =>{
     const {post_id} = req.body
     try{
          if(!post_id){
-        console.log('帖子id:' + post_id);
+        
         return res.status(400).json({
             code:400,
             message:'没有提供帖子id'
@@ -112,7 +113,7 @@ router.post('/like', verifyToken, async (req,res) =>{
          return res.status(200).json({code:200, message:'取消点赞成功'})
     }else{
         await db.query('INSERT INTO post_like(user_id,post_id) VALUES(?,?)',[req.user.id,post_id])
-        return res.status(200).json({code:200, message:'点赞成功'})
+        return res.status(200).json({code:200, message:'点赞成功'}) 
     }
     }
         catch(err){

@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const verifyToken = require('../utils/verify')
 const multer = require('multer')
+const sharp = require('sharp')
 const db = require('../sql-db/db')
 const fs = require('fs')
 const path = require('path')
@@ -20,6 +21,7 @@ router.post('/image/upload', verifyToken, upload.single('image'), async (req, re
                 message: '请选择要上传的图片'
             })
         }
+         await sharp(req.file.path).metadata()
         const imagePath = req.file.filename
         console.log(imagePath);
         await db.query('INSERT INTO image (user_id, image_path) VALUES (?, ?)', [req.user.id, imagePath])
@@ -30,6 +32,8 @@ router.post('/image/upload', verifyToken, upload.single('image'), async (req, re
         })
     } catch (err) {
         console.log(err.message)
+        if(req.file?.path)
+            fs.unlink(req.file.path,()=>{})
         res.status(500).json({
             code: 500,
             message: '上传时出现问题'
@@ -93,15 +97,18 @@ router.delete('/image/delete', verifyToken, async (req, res) => {
             message: '没能正确传递图片id'
         })
     }
+   
     try {
         // 带上 user_id 条件，防止删掉别人的图片
         const [row] = await db.query('SELECT id, image_path FROM image WHERE id = ? AND user_id = ?', [id, req.user.id])
         if (row.length === 0) {
             return res.status(400).json({
                 code: 400,
-                message: '图片不存在或不是你上传的'
+                message: '图片不存在或不是你上传的,又或者。你想越权'
             })
         }
+         
+          
         await db.query('DELETE FROM image WHERE id = ? AND user_id = ?', [id, req.user.id])
         // 数据库记录已经删掉，物理文件删不掉也只记日志，不影响接口返回成功
         const fileName = row[0].image_path
@@ -110,12 +117,15 @@ router.delete('/image/delete', verifyToken, async (req, res) => {
                 if (err) console.log('删除图片文件失败:', err.message)
             })
         }
+        
         res.status(200).json({
             code: 200,
             message: '删除成功'
         })
     } catch (err) {
         console.log(err.message)
+       
+        
         res.status(500).json({
             code: 500,
             message: '删除图片时出现问题'
