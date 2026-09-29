@@ -32,7 +32,7 @@ router.post('/comment/create', verifyToken, async (req,res) =>{
         })
        }
        catch(err){
-        console.log(err.message);
+        console.error(err.message);
         
         res.status(500).json({
             code:500,
@@ -77,7 +77,7 @@ router.get('/comment/list', verifyToken, async (req,res) =>{
             })
     }
     catch(err){
-        console.log(err.message);
+        console.error(err.message);
         res.status(500).json({
             code:500,
             message:'额,出了点问题'

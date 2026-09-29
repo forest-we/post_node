@@ -6,7 +6,6 @@ const { UPLOAD_PREFIX, fileUrl } = require('../utils/url')
 router.post('/post/create', verifyToken, async (req, res) =>{   //发布帖子
     try{
           const {title, content} = req.body
-          console.log('用户:' + req.user.username, '发布:' + title + '正文:' + content);
     if(!title || !content){
         return res.status(400).json({
             code:400,
@@ -22,7 +21,7 @@ router.post('/post/create', verifyToken, async (req, res) =>{   //发布帖子
         }
     }
   catch(err){
-    console.log(err.message);
+    console.error(err.message);
     res.status(500).json({
         code:500,
         message:'额,出了点问题'
@@ -31,14 +30,11 @@ router.post('/post/create', verifyToken, async (req, res) =>{   //发布帖子
 })
 router.get('/post/list', verifyToken, async (req,res) =>{   //主页贴子展示
         try{
-            console.log(req.headers['x-real-ip']);
             const page = Number(req.query.page) || 1   //页数
              const  pageSize = Number(req.query.pageSize) || 10   //查询多少条数据
     const offset = (page - 1) * pageSize   
-    console.log('查询总数量:' + offset, '查询第' + page);
     const [row] = await db.query('SELECT post.id, post.title, post.create_time, user.username, CONCAT(?, user.avatar) AS avatar, COUNT(post_like.id) AS post_like_COUNT FROM post LEFT JOIN user ON post.user_id = user.id LEFT JOIN post_like ON post_like.post_id = post.id GROUP BY post.id, post.title, post.create_time, user.username, user.avatar ORDER BY post.create_time DESC LIMIT ?, ?; ', [UPLOAD_PREFIX, offset, pageSize])
     const [totle] = await db.query('SELECT COUNT(*) AS total FROM post')
-    console.log(row);
     const total = totle[0].total
     if(row.length > 0){
         res.status(200).json({
@@ -56,7 +52,7 @@ router.get('/post/list', verifyToken, async (req,res) =>{   //主页贴子展示
     }
         }
         catch(err){
-            console.log(err.message);
+            console.error(err.message);
             res.status(500).json({
                 code:500,
                 message:'额,出了点问题'
@@ -66,7 +62,6 @@ router.get('/post/list', verifyToken, async (req,res) =>{   //主页贴子展示
 router.get('/post/detail', verifyToken, async (req,res) =>{     //帖子详情页
         try{
             const post_id = req.query.post_id
-     console.log('详情页post.id' + post_id);
     if(!post_id){
         return res.status(400).json({
             code:400,
@@ -74,9 +69,7 @@ router.get('/post/detail', verifyToken, async (req,res) =>{     //帖子详情�
         })
     }
     const [row] = await db.query('SELECT post.title, post.content, user.id, user.username, CONCAT(?, user.avatar) AS avatar FROM post LEFT JOIN user ON post.user_id = user.id WHERE post.id = ?', [UPLOAD_PREFIX, post_id])
-    console.log(row[0]);
     if(row.length === 0){
-        console.log(post_id);
         return res.status(400).json({
             code:400,
             message:'该帖子都没人发'
@@ -92,7 +85,7 @@ router.get('/post/detail', verifyToken, async (req,res) =>{     //帖子详情�
             res.status(500).json({
                 code:500
             })
-            console.log(err.message);
+            console.error(err.message);
             
         }
 })
@@ -123,7 +116,7 @@ router.post('/like', verifyToken, async (req,res) =>{
                     message:'已经点过赞了'
                 })
             }
-            console.log(err.message);
+            console.error(err.message);
             res.status(500).json({
                 code:500,
                 message:'点赞时出现问题'
@@ -149,7 +142,7 @@ router.get('/follow/post', verifyToken, async (req,res) =>{
     })
     }
     catch(err){
-        console.log(err.message);
+        console.error(err.message);
         res.status(500).json({
             code:500,
             message:'查询关注用户帖子时出了点问题'
@@ -194,7 +187,7 @@ router.delete('/post/delete', verifyToken, async (req,res) =>{
         })
     }
     catch(err){
-        console.log(err.message);
+        console.error(err.message);
         try { await connection.rollback() } catch(e) {}
         connection.release()
         res.status(500).json({

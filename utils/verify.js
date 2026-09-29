@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-require('dotenv').config()
+require('dotenv').config({ quiet: true })
 
 const verifyToken = (req, res, next) =>{
    try{
@@ -22,7 +22,7 @@ const verifyToken = (req, res, next) =>{
         next()
    }
    catch(err){
-    console.log(err.message);
+    console.error(err.message);
     res.status(401).json({
         code:401,
         message:'token无效或过期'

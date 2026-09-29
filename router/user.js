@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-require('dotenv').config()
+require('dotenv').config({ quiet: true })
 const db = require('../sql-db/db')
 const {hashPwd} = require('../utils/pws')
 const { verifyPwd} = require('../utils/pws')
@@ -9,7 +9,6 @@ const verifyToken = require('../utils/verify')
 const { UPLOAD_PREFIX, fileUrl } = require('../utils/url')
 router.post('/register', async (req,res) =>{
     const {username, password} = req.body
-    console.log('注册名:' + username);
    try{
      if(!username || !password){
         return res.status(400).json({
@@ -38,7 +37,7 @@ router.post('/register', async (req,res) =>{
         code:500,
         message:'额,出点问题'
     })
-    console.log(err.message);
+    console.error(err.message);
    }
 })  
 router.post('/login', async (req,res) =>{
@@ -57,7 +56,6 @@ router.post('/login', async (req,res) =>{
             })
         }
         const user = row[0]
-        console.log(user);
         const ok = await verifyPwd(password, user.password)
         //密码对比失败返回空
         if(!ok){
@@ -88,7 +86,6 @@ router.post('/login', async (req,res) =>{
 router.post('/follow', verifyToken, async (req,res) =>{  //逻辑 存入关注者和被关注者
     try{
          const {post_user_id} = req.body
-         console.log(post_user_id);
         if(!post_user_id){
             return res.status(400).json({
                 code:400,
@@ -117,7 +114,7 @@ router.post('/follow', verifyToken, async (req,res) =>{  //逻辑 存入关注�
         
     }
     catch(err){
-        console.log(err.message);
+        console.error(err.message);
         res.status(500).json({
             code:500,
             message:'关注时出现问题'
@@ -140,7 +137,7 @@ router.get('/follow/status', verifyToken, async (req,res) =>{
         })
     }
     catch(err){
-        console.log(err.message)
+        console.error(err.message)
         res.status(500).json({
             code:500,
             message:'查询关注状态时出现问题'
@@ -158,7 +155,7 @@ router.get('/follow/post-list', verifyToken, async (req,res) =>{
         res.status(200).json({code:200, message:'查询成功', data:row, total:total})
     }
     catch(err){
-        console.log(err.message)
+        console.error(err.message)
         res.status(500).json({code:500, message:'查询关注帖子时出现问题'})
     }
 })

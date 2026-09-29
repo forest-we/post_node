@@ -23,7 +23,6 @@ router.post('/image/upload', verifyToken, upload.single('image'), async (req, re
         }
          await sharp(req.file.path).metadata()
         const imagePath = req.file.filename
-        console.log(imagePath);
         await db.query('INSERT INTO image (user_id, image_path) VALUES (?, ?)', [req.user.id, imagePath])
         res.status(200).json({
             code: 200,
@@ -31,7 +30,7 @@ router.post('/image/upload', verifyToken, upload.single('image'), async (req, re
             url: fileUrl(imagePath)
         })
     } catch (err) {
-        console.log(err.message)
+        console.error(err.message)
         if(req.file?.path)
             fs.unlink(req.file.path,()=>{})
         res.status(500).json({
@@ -57,7 +56,7 @@ router.get('/image/list', verifyToken, async (req, res) => {
             total:total
         })
     } catch (err) {
-        console.log(err.message)
+        console.error(err.message)
         res.status(500).json({
             code: 500,
             message: '查询图片列表时出现问题'
@@ -114,7 +113,7 @@ router.delete('/image/delete', verifyToken, async (req, res) => {
         const fileName = row[0].image_path
         if (fileName && !fileName.includes('/') && !fileName.includes('\\')) {
             fs.unlink(path.join(__dirname, '..', 'uploads', fileName), (err) => {
-                if (err) console.log('删除图片文件失败:', err.message)
+                if (err) console.warn('删除图片文件失败:', err.message)
             })
         }
         
@@ -123,7 +122,7 @@ router.delete('/image/delete', verifyToken, async (req, res) => {
             message: '删除成功'
         })
     } catch (err) {
-        console.log(err.message)
+        console.error(err.message)
        
         
         res.status(500).json({

@@ -37,7 +37,7 @@ router.post('/upload',  verifyToken, upload.single('avatar'), async (req,res) =>
     }
    }
    catch(err){
-    console.log(err.message);
+    console.error(err.message);
      if(req.file?.path)
       fs.unlink(req.file.path,()=>{})
     res.status(500).json({
@@ -53,7 +53,6 @@ router.get('/upload', verifyToken,  async (req,res) =>{
    try{
      const [row] = await db.query('SELECT avatar FROM user WHERE id = ?', [id])
       const avatar = row[0].avatar
-     console.log('用户头像:' + avatar);
         if(!row[0] || !row[0].avatar){
            return res.status(200).json({
             code:200,
@@ -71,7 +70,7 @@ router.get('/upload', verifyToken,  async (req,res) =>{
         code:500,
         message:'额'
     })
-    console.log(err.message);
+    console.error(err.message);
    }
 })
 
@@ -115,7 +114,7 @@ router.put('/user/add', verifyToken, async (req,res) =>{
         }
     }
     catch(err){
-        console.log(err.message);
+        console.error(err.message);
         res.status(500).json({
             code:500,
             message:'修改时出现错误'

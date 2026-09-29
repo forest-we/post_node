@@ -1,5 +1,5 @@
 const express = require('express')
-require('dotenv').config()
+require('dotenv').config({ quiet: true })
 const mysql = require('mysql2/promise')
 
 const db = mysql.createPool({
